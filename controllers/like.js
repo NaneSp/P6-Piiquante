@@ -1,4 +1,3 @@
-
 /*création du controller LIke*/
 
 //--> les différents états à obtenir :
@@ -21,7 +20,7 @@ exports.evaluateSauce = (req, res, next) => {
 
 //console.log(req.body.userId);// = 6336a0826bf232ab8f3196af
 
-//console.log("valeur du LIKE POSTMAN",req.body.like);//retourne like/dislike indiqué ds le body de la requete postman 
+console.log("valeur du LIKE POSTMAN",req.body.like);//retourne like/dislike indiqué ds le body de la requete postman 
 
 //console.log(req.params);//retourne l'id sans le _
 //{ id: '6336a1276bf232ab8f3196b6' }
@@ -37,12 +36,8 @@ Sauce.findOne({_id : req.params.id})
         //utilisation de l'instruction switch afin de vérifier la valeur de l'objet
         switch (req.body.like) {
             //cas n°1 J'aime : 
-            case 1 : // si le user a déjà liké ou disliké
-                if( req.body.like === 1){
-                    if(sauce.usersLiked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)){
-                    res.status(400).json({ message :"Vous avez déjà voté!!"})
-                    }
-                    else{
+            case 1 : //si le userId n'est pas inclus dans le tableau usersLikedet ET que dans la requête on envoie un like strictement égal 1 alors je vais ajouter son like avec +1 et le userId ds le tableau de usersLiked  
+                if(!sauce.usersLiked.includes(req.body.userId) && req.body.like === 1) {
                     //mise à jour de la bdd MongoDB avec ses opérateurs inc qui incrémente et push qui ajoute la valeur spécifiée 
                     Sauce.updateOne(
                         {_id:req.params.id},
@@ -53,17 +48,12 @@ Sauce.findOne({_id : req.params.id})
                     )
                         .then(() => res.status(201).json({ message : "Vous aimez cette Sauce!! YOoouuuHhOOoUUu!!"}))
                         .catch((error) => res.status(400).json({error}));
-                    }
-                } //else {console.log("FALSE",);}
+                } //else {console.log("FALSE");}
                 break;
 
             //cas n°2 J'aime pas :
-            case -1: //
-                if(req.body.like === -1) {
-                    if(sauce.usersDisliked.includes(req.body.userId) || sauce.usersDisliked.includes(req.body.userId)){
-                        res.status(400).json({ message :"Vous avez déjà voté!!"})    
-
-                    }else{
+            case -1: //si le userId n'est pas inclus dans le tableau usersDisliked ET que ds la requête on envoie un dislike strictement égale à -1 alors je vais ajouter un dislike avec +1 et le userId ds le tableau usersDisliked
+                if(!sauce.usersDisliked.includes(req.body.userId) && req.body.like === -1) {
                     //mise à jour de la bdd MongoDB avec ses opérateurs
                     Sauce.updateOne(
                         {_id:req.params.id},
@@ -74,8 +64,7 @@ Sauce.findOne({_id : req.params.id})
                     )
                         .then(() => res.status(201).json({ message : "Vous n'aimez pas cette Sauce!! EUuuUUUrrrkkKKK !!"}))
                         .catch((error) => res.status(400).json({error}));
-                    }
-                }//else {console.log("FALSE",);}
+                }
                 break;
 
             //cas n°3 Je n'aime plus et je ne dislike plus 
